@@ -1,0 +1,11 @@
+# Godot 4+
+.godot/
+*.translation
+import.cfg
+export_presets.cfg
+export/
+
+# OS / tools
+.DS_Store
+Thumbs.db
+*.tmp
