@@ -10,6 +10,16 @@ wait_time = 2.15
 one_shot = false
 autostart = false
 
-[node name="Polygon2D" type="Polygon2D" parent="."]
-polygon = PackedVector2Array(0, -16, 18, 0, 0, 16, -18, 0)
-color = Color(0.5, 0.9, 1, 1)
+[node name="TeamLetter" type="Label" parent="."]
+visible = false
+offset_left = -20.0
+offset_top = -52.0
+offset_right = 20.0
+offset_bottom = -12.0
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 22
+text = "A"
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1

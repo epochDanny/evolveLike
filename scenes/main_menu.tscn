@@ -1,0 +1,119 @@
+[gd_scene format=3 uid="uid://mainmenu001"]
+
+[ext_resource type="Script" path="res://scripts/main_menu.gd" id="1"]
+
+[node name="MainMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="ColorRect" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.08, 0.09, 0.12, 1)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBox" type="VBoxContainer" parent="Center"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="Center/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "EvolvesLike"
+horizontal_alignment = 1
+
+[node name="Subtitle" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "Choose match type, size, and which fort you control."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="ModeLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "Mode"
+
+[node name="ModeOption" type="OptionButton" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 0
+item_count = 2
+popup/item_0/text = "Teams (up to 3v3)"
+popup/item_0/id = 0
+popup/item_1/text = "Free for all (2–6 players)"
+popup/item_1/id = 1
+
+[node name="TeamsLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "Team size"
+
+[node name="TeamsSizeOption" type="OptionButton" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+selected = 2
+item_count = 3
+popup/item_0/text = "1v1 (2 players)"
+popup/item_0/id = 0
+popup/item_1/text = "2v2 (4 players)"
+popup/item_1/id = 1
+popup/item_2/text = "3v3 (6 players)"
+popup/item_2/id = 2
+
+[node name="FFALabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+visible = false
+text = "Players in FFA"
+
+[node name="FFAPlayerOption" type="OptionButton" parent="Center/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+selected = 4
+item_count = 5
+popup/item_0/text = "2 players"
+popup/item_0/id = 0
+popup/item_1/text = "3 players"
+popup/item_1/id = 1
+popup/item_2/text = "4 players"
+popup/item_2/id = 2
+popup/item_3/text = "5 players"
+popup/item_3/id = 3
+popup/item_4/text = "6 players"
+popup/item_4/id = 4
+
+[node name="HumanLabel" type="Label" parent="Center/VBox"]
+layout_mode = 2
+text = "You control"
+
+[node name="HumanSlotOption" type="OptionButton" parent="Center/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="StartButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Start"
+
+[node name="QuitButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Quit"
+
+[connection signal="item_selected" from="Center/VBox/ModeOption" to="." method="_on_mode_changed"]
+[connection signal="item_selected" from="Center/VBox/TeamsSizeOption" to="." method="_rebuild_human_slots"]
+[connection signal="item_selected" from="Center/VBox/FFAPlayerOption" to="." method="_rebuild_human_slots"]
+[connection signal="pressed" from="Center/VBox/StartButton" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="Center/VBox/QuitButton" to="." method="_on_quit_pressed"]
