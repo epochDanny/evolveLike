@@ -101,3 +101,4 @@ func _die() -> void:
 		if mgr and mgr.has_method("register_kill"):
 			mgr.register_kill(_last_attacker_team)
 	queue_free()
+
