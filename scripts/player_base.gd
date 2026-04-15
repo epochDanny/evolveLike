@@ -8,6 +8,8 @@ extends Node2D
 
 var kills: int = 0
 var player_color: Color = Color.WHITE
+## Set when this player's fort is destroyed; spawner removed and no new units.
+var is_eliminated: bool = false
 
 @onready var bunker: Bunker = $Bunker
 @onready var spawner: SpawnerNode = $Spawner
@@ -27,6 +29,22 @@ func _ready() -> void:
 
 func add_kill() -> void:
 	kills += 1
+
+
+## Keeps a world point outside this player's fort footprint (label + sprite), centered on the bunker.
+func clamp_world_position_clear_of_own_bunker(world_pos: Vector2, extra_margin: float) -> Vector2:
+	if bunker == null or not is_instance_valid(bunker):
+		return world_pos
+	return bunker.push_world_position_outside_footprint(world_pos, extra_margin)
+
+
+func eliminate_from_match() -> void:
+	if is_eliminated:
+		return
+	is_eliminated = true
+	if spawner != null and is_instance_valid(spawner):
+		spawner.stop_spawning()
+		spawner.queue_free()
 
 
 func get_enemy_bunker_position() -> Vector2:
@@ -64,7 +82,11 @@ func get_nearest_enemy_unit_position(from_global: Vector2) -> Vector2:
 func get_ai_spawner_goal_for_spawner() -> Vector2:
 	if EvolutionConfig.ai_should_consider_bunkers_for_targeting(kills):
 		return get_enemy_bunker_position()
-	var from_pos := spawner.global_position if spawner else global_position
+	var from_pos := (
+		spawner.global_position
+		if spawner != null and is_instance_valid(spawner)
+		else global_position
+	)
 	var up := get_nearest_enemy_unit_position(from_pos)
 	if up != Vector2.ZERO:
 		return up

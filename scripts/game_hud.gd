@@ -30,6 +30,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	if not e.pressed or e.echo:
 		return
 
+	var mui := get_tree().get_first_node_in_group("match_ui") as MatchUI
+	if mui != null and mui.is_modal_visible():
+		return
+
 	if e.keycode == KEY_P or e.keycode == KEY_ESCAPE:
 		get_tree().paused = not get_tree().paused
 		var vp := get_viewport()

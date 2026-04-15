@@ -1,8 +1,56 @@
 class_name Bunker
 extends Node2D
 
+## Matches fort art: sprite 176×120 centered on this node; label sits above the sprite (see bunker.tscn).
+const FOOTPRINT_HALF_WIDTH: float = 88.0
+## Local space: label reaches about y = -100, sprite bottom about y = +60 from bunker origin.
+const FOOTPRINT_EXTENT_ABOVE_CENTER: float = 100.0
+const FOOTPRINT_EXTENT_BELOW_CENTER: float = 60.0
+
 signal destroyed_bunker(team_id: int)
 signal health_changed(current: float, maximum: float)
+
+
+## Push a world point outside this bunker's label+sprite footprint (used for spawn placement vs all forts).
+func push_world_position_outside_footprint(world_pos: Vector2, extra_margin: float) -> Vector2:
+	var half_w: float = FOOTPRINT_HALF_WIDTH + extra_margin
+	var y_top: float = FOOTPRINT_EXTENT_ABOVE_CENTER + extra_margin
+	var y_bot: float = FOOTPRINT_EXTENT_BELOW_CENTER + extra_margin
+	var local: Vector2 = world_pos - global_position
+	local = push_local_outside_footprint(local, half_w, y_top, y_bot)
+	return global_position + local
+
+
+## If `local` lies inside the footprint box, scale along the ray from the bunker origin to the box edge.
+static func push_local_outside_footprint(
+	local: Vector2, half_w: float, y_top: float, y_bot: float
+) -> Vector2:
+	if absf(local.x) > half_w or local.y < -y_top or local.y > y_bot:
+		return local
+	var t: float = INF
+	if absf(local.x) > 0.0001:
+		t = minf(t, half_w / absf(local.x))
+	if absf(local.y) > 0.0001:
+		if local.y < 0.0:
+			t = minf(t, y_top / absf(local.y))
+		elif local.y > 0.0:
+			t = minf(t, y_bot / absf(local.y))
+	if t >= INF - 1.0:
+		return Vector2(half_w * 1.001, 0.0)
+	return local * t * 1.001
+
+
+## Closest point on the fort footprint AABB (matches StaticBody2D rect) for range / navigation.
+func closest_point_on_footprint_world(world_pos: Vector2) -> Vector2:
+	var l: Vector2 = world_pos - global_position
+	var cx: float = clampf(l.x, -FOOTPRINT_HALF_WIDTH, FOOTPRINT_HALF_WIDTH)
+	var cy: float = clampf(l.y, -FOOTPRINT_EXTENT_ABOVE_CENTER, FOOTPRINT_EXTENT_BELOW_CENTER)
+	return global_position + Vector2(cx, cy)
+
+
+func distance_to_footprint_edge(world_pos: Vector2) -> float:
+	return world_pos.distance_to(closest_point_on_footprint_world(world_pos))
+
 
 @export var team_id: int = 0
 @export var team_name: String = "Team"
@@ -20,8 +68,8 @@ var _owner_base: PlayerBase = null
 @onready var _label: Label = $Label
 
 
-func set_owner_base(owner: PlayerBase) -> void:
-	_owner_base = owner
+func set_owner_base(player_base: PlayerBase) -> void:
+	_owner_base = player_base
 
 
 func apply_player_visual(accent: Color) -> void:

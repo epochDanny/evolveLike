@@ -18,13 +18,16 @@ var _last_killer: PlayerBase = null
 ## Spawner's fort; used so AI prioritizes enemy units until late evolution.
 var _owner_player: PlayerBase = null
 
-@onready var _sprite: Sprite2D = $Sprite2D
 @onready var _tier_label: Label = $TierLabel
 @onready var _nav: NavigationAgent2D = $NavigationAgent2D
 
 
-func set_owner_player(owner: PlayerBase) -> void:
-	_owner_player = owner
+func set_owner_player(player_base: PlayerBase) -> void:
+	_owner_player = player_base
+
+
+func get_owner_player() -> PlayerBase:
+	return _owner_player
 
 
 func setup_from_stats(
@@ -44,9 +47,9 @@ func setup_from_stats(
 func _ready() -> void:
 	add_to_group("units")
 	motion_mode = MOTION_MODE_FLOATING
-	# Layer 2: bump other units (same layer/mask) so armies don't occupy the same spot.
+	# Layer 2: units; layer 3 (bit value 4): bunker StaticBody2D — cannot walk through forts.
 	collision_layer = 2
-	collision_mask = 2
+	collision_mask = 2 | 4
 	_nav.avoidance_enabled = true
 	_nav.radius = 22.0
 	_nav.neighbor_distance = 64.0
@@ -78,15 +81,16 @@ func _physics_process(delta: float) -> void:
 	if _target == null or not is_instance_valid(_target):
 		_nav.set_velocity(Vector2.ZERO)
 		return
-	var dist := global_position.distance_to(_target.global_position)
+	var dist := _distance_to_target_for_combat()
+	var nav_goal := _nav_goal_for_target()
 	if dist <= attack_range + 4.0:
-		_nav.target_position = _target.global_position
+		_nav.target_position = nav_goal
 		_nav.set_velocity(Vector2.ZERO)
 		if _attack_timer <= 0.0:
 			_deal_damage_to(_target)
 			_attack_timer = attack_cooldown
 		return
-	_nav.target_position = _target.global_position
+	_nav.target_position = nav_goal
 	var next_pos := _nav.get_next_path_position()
 	var to_next := global_position.direction_to(next_pos)
 	if to_next.length_squared() < 0.0001:
@@ -98,6 +102,18 @@ func _physics_process(delta: float) -> void:
 func _on_velocity_computed(safe_velocity: Vector2) -> void:
 	velocity = safe_velocity
 	move_and_slide()
+
+
+func _distance_to_target_for_combat() -> float:
+	if _target is Bunker:
+		return (_target as Bunker).distance_to_footprint_edge(global_position)
+	return global_position.distance_to(_target.global_position)
+
+
+func _nav_goal_for_target() -> Vector2:
+	if _target is Bunker:
+		return (_target as Bunker).closest_point_on_footprint_world(global_position)
+	return _target.global_position
 
 
 func _acquire_target() -> void:
@@ -116,7 +132,7 @@ func _acquire_target() -> void:
 				continue
 			if b is Bunker and (b as Bunker).team_id == team_id:
 				continue
-			var d := global_position.distance_to(b.global_position)
+			var d: float = (b as Bunker).distance_to_footprint_edge(global_position)
 			if d < best_d:
 				best_d = d
 				best = b as Node2D
@@ -138,9 +154,9 @@ func _acquire_target() -> void:
 				continue
 			if b is Bunker and (b as Bunker).team_id == team_id:
 				continue
-			var d := global_position.distance_to(b.global_position)
-			if d < best_d:
-				best_d = d
+			var d2b: float = (b as Bunker).distance_to_footprint_edge(global_position)
+			if d2b < best_d:
+				best_d = d2b
 				best = b as Node2D
 
 	_target = best

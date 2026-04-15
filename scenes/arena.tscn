@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3 uid="uid://arena001"]
+[gd_scene load_steps=5 format=3 uid="uid://arena001"]
 
 [ext_resource type="Script" path="res://scripts/match_manager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/game_hud.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/arena_navigation.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/match_ui.gd" id="5"]
 
 [node name="Arena" type="Node2D" groups=["arena_root"]]
 script = ExtResource("1")
@@ -72,3 +73,178 @@ theme_override_colors/font_color = Color(1, 0.88, 0.35, 1)
 text = "PAUSED
 P / Esc — resume"
 visible = false
+
+[node name="MatchLayer" type="CanvasLayer" parent="."]
+layer = 1
+
+[node name="MatchUI" type="Control" parent="MatchLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("5")
+
+[node name="Dim" type="ColorRect" parent="MatchLayer/MatchUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 0.65)
+
+[node name="TeamsEnd" type="PanelContainer" parent="MatchLayer/MatchUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -240.0
+offset_top = -150.0
+offset_right = 240.0
+offset_bottom = 150.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="MatchLayer/MatchUI/TeamsEnd"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="MatchLayer/MatchUI/TeamsEnd/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="MatchLayer/MatchUI/TeamsEnd/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 26
+horizontal_alignment = 1
+text = "Congratulations!"
+
+[node name="Body" type="Label" parent="MatchLayer/MatchUI/TeamsEnd/Margin/VBox"]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+text = "Team A wins."
+
+[node name="ToMenu" type="Button" parent="MatchLayer/MatchUI/TeamsEnd/Margin/VBox"]
+layout_mode = 2
+text = "Return to main menu"
+
+[node name="FFAEliminated" type="PanelContainer" parent="MatchLayer/MatchUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -280.0
+offset_top = -160.0
+offset_right = 280.0
+offset_bottom = 160.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="MatchLayer/MatchUI/FFAEliminated"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="MatchLayer/MatchUI/FFAEliminated/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Body" type="Label" parent="MatchLayer/MatchUI/FFAEliminated/Margin/VBox"]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+text = "Your fort was destroyed."
+
+[node name="Buttons" type="HBoxContainer" parent="MatchLayer/MatchUI/FFAEliminated/Margin/VBox"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 16
+
+[node name="Watch" type="Button" parent="MatchLayer/MatchUI/FFAEliminated/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Continue watching"
+
+[node name="ToMenu" type="Button" parent="MatchLayer/MatchUI/FFAEliminated/Margin/VBox/Buttons"]
+layout_mode = 2
+text = "Main menu"
+
+[node name="FFAOver" type="PanelContainer" parent="MatchLayer/MatchUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -130.0
+offset_right = 260.0
+offset_bottom = 130.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Margin" type="MarginContainer" parent="MatchLayer/MatchUI/FFAOver"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="MatchLayer/MatchUI/FFAOver/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Body" type="Label" parent="MatchLayer/MatchUI/FFAOver/Margin/VBox"]
+layout_mode = 2
+horizontal_alignment = 1
+autowrap_mode = 2
+text = "The match is over."
+
+[node name="ToMenu" type="Button" parent="MatchLayer/MatchUI/FFAOver/Margin/VBox"]
+layout_mode = 2
+text = "Return to main menu"
+
+[node name="SpectatorBar" type="PanelContainer" parent="MatchLayer/MatchUI"]
+visible = false
+layout_mode = 1
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -200.0
+offset_top = -56.0
+offset_right = 200.0
+offset_bottom = -12.0
+grow_horizontal = 2
+grow_vertical = 0
+
+[node name="HBox" type="HBoxContainer" parent="MatchLayer/MatchUI/SpectatorBar"]
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 12
+
+[node name="Hint" type="Label" parent="MatchLayer/MatchUI/SpectatorBar/HBox"]
+layout_mode = 2
+text = "Spectating — you can leave any time:"
+
+[node name="LeaveButton" type="Button" parent="MatchLayer/MatchUI/SpectatorBar/HBox"]
+layout_mode = 2
+text = "Leave to main menu"

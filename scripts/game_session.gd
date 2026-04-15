@@ -37,12 +37,12 @@ func get_base_layout() -> Array[Dictionary]:
 		for slot in range(n):
 			var team: int = 0 if slot < half else 1
 			var local := (slot + 1) if team == 0 else (slot - half + 1)
-			var name := "Team A%d" % local if team == 0 else "Team B%d" % local
+			var team_label := "Team A%d" % local if team == 0 else "Team B%d" % local
 			out.append(
 				{
 					"slot": slot,
 					"team_id": team,
-					"team_name": name,
+					"team_name": team_label,
 					"position": _slot_position_teams(slot, teams_match_size),
 					"is_human": slot == human_slot,
 				}
