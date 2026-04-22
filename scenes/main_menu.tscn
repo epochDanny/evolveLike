@@ -108,12 +108,152 @@ layout_mode = 2
 layout_mode = 2
 text = "Start"
 
+[node name="SettingsButton" type="Button" parent="Center/VBox"]
+layout_mode = 2
+text = "Settings"
+
 [node name="QuitButton" type="Button" parent="Center/VBox"]
 layout_mode = 2
 text = "Quit"
+
+[node name="SettingsLayer" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="SettingsOverlay" type="Control" parent="SettingsLayer"]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Dim" type="ColorRect" parent="SettingsLayer/SettingsOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.55)
+mouse_filter = 0
+
+[node name="Center" type="CenterContainer" parent="SettingsLayer/SettingsOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="Panel" type="PanelContainer" parent="SettingsLayer/SettingsOverlay/Center"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+mouse_filter = 0
+
+[node name="Margin" type="MarginContainer" parent="SettingsLayer/SettingsOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 16
+
+[node name="VBox" type="VBoxContainer" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SettingsTitle" type="Label" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Settings"
+horizontal_alignment = 1
+
+[node name="AudioSection" type="Label" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox"]
+layout_mode = 2
+text = "Audio"
+
+[node name="MusicRow" type="VBoxContainer" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="MusicLabelRow" type="HBoxContainer" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/MusicRow"]
+layout_mode = 2
+
+[node name="MusicLabel" type="Label" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/MusicRow/MusicLabelRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Music"
+
+[node name="MusicPercent" type="Label" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/MusicRow/MusicLabelRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "100%"
+
+[node name="MusicVolumeSlider" type="HSlider" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/MusicRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+mouse_filter = 0
+
+[node name="SfxRow" type="VBoxContainer" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SfxLabelRow" type="HBoxContainer" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/SfxRow"]
+layout_mode = 2
+
+[node name="SfxLabel" type="Label" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/SfxRow/SfxLabelRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Sound"
+
+[node name="SfxPercent" type="Label" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/SfxRow/SfxLabelRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "100%"
+
+[node name="SfxVolumeSlider" type="HSlider" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/SfxRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 20)
+layout_mode = 2
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 100.0
+mouse_filter = 0
+
+[node name="MusicMuteCheck" type="CheckBox" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mute music"
+mouse_filter = 0
+
+[node name="SfxMuteCheck" type="CheckBox" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mute sound"
+mouse_filter = 0
+
+[node name="SettingsBackButton" type="Button" parent="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Back"
+mouse_filter = 0
 
 [connection signal="item_selected" from="Center/VBox/ModeOption" to="." method="_on_mode_changed"]
 [connection signal="item_selected" from="Center/VBox/TeamsSizeOption" to="." method="_rebuild_human_slots"]
 [connection signal="item_selected" from="Center/VBox/FFAPlayerOption" to="." method="_rebuild_human_slots"]
 [connection signal="pressed" from="Center/VBox/StartButton" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="Center/VBox/SettingsButton" to="." method="_on_settings_pressed"]
 [connection signal="pressed" from="Center/VBox/QuitButton" to="." method="_on_quit_pressed"]
+[connection signal="value_changed" from="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/MusicRow/MusicVolumeSlider" to="." method="_on_music_volume_changed"]
+[connection signal="value_changed" from="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/SfxRow/SfxVolumeSlider" to="." method="_on_sfx_volume_changed"]
+[connection signal="toggled" from="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/MusicMuteCheck" to="." method="_on_music_mute_toggled"]
+[connection signal="toggled" from="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/SfxMuteCheck" to="." method="_on_sfx_mute_toggled"]
+[connection signal="pressed" from="SettingsLayer/SettingsOverlay/Center/Panel/Margin/VBox/SettingsBackButton" to="." method="_on_settings_back_pressed"]

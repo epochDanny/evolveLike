@@ -24,7 +24,11 @@ var _player_order: PlayerOrder = PlayerOrder.NONE
 var _move_goal: Vector2 = Vector2.ZERO
 var _attack_order_target: Node2D = null
 
-var _selected_visual: bool = false
+var _friendly_selected: bool = false
+var _enemy_inspect: bool = false
+
+const _FRIENDLY_RING := Color(0.35, 0.95, 0.42, 0.95)
+const _ENEMY_INSPECT_RING := Color(0.98, 0.38, 0.32, 0.96)
 
 ## Kenney animal pack (Round); used for tier 3+ (tiers 1–2 use custom mite / striker art).
 const _KENNEY_ROUND_TEXTURES: Array[Texture2D] = [
@@ -63,7 +67,16 @@ func get_owner_player() -> PlayerBase:
 
 
 func set_selected(selected: bool) -> void:
-	_selected_visual = selected
+	_friendly_selected = selected
+	if selected:
+		_enemy_inspect = false
+	queue_redraw()
+
+
+func set_enemy_inspected(inspected: bool) -> void:
+	_enemy_inspect = inspected
+	if inspected:
+		_friendly_selected = false
 	queue_redraw()
 
 
@@ -118,8 +131,26 @@ func _ready() -> void:
 
 
 func _draw() -> void:
-	if _selected_visual:
-		draw_arc(Vector2.ZERO, 19.0, 0.0, TAU, 48, Color(0.35, 0.95, 0.42, 0.95), 2.0, true)
+	if not _friendly_selected and not _enemy_inspect:
+		return
+	var ring: Color = _FRIENDLY_RING if _friendly_selected else _ENEMY_INSPECT_RING
+	draw_arc(Vector2.ZERO, 19.0, 0.0, TAU, 48, ring, 2.0, true)
+	var bar_top := -72.0
+	if _enemy_inspect:
+		var txt := "%.0f / %.0f" % [hp, max_hp]
+		var font := ProceduralTextures.default_ui_font()
+		var fs := 11
+		var sz: Vector2 = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
+		draw_string(
+			font,
+			Vector2(-sz.x * 0.5, bar_top - float(fs) - 2.0),
+			txt,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			fs,
+			Color(0.98, 0.45, 0.4, 0.98)
+		)
+	HealthBarUtil.draw_bar(self, 0.0, bar_top, 44.0, 5.0, hp, max_hp)
 
 
 static func _texture_black_to_transparent(src: Texture2D) -> Texture2D:
@@ -411,6 +442,7 @@ func _deal_damage_to(target: Node2D) -> void:
 		(target as Bunker).take_damage(damage, team_id, killer)
 	elif target is CombatUnit:
 		(target as CombatUnit).take_damage(damage, team_id, killer)
+	SfxRouter.play_unit_attack(global_position, self)
 
 
 func take_damage(amount: float, attacker_team: int, killer: PlayerBase = null) -> void:
@@ -418,6 +450,8 @@ func take_damage(amount: float, attacker_team: int, killer: PlayerBase = null) -
 		return
 	_last_killer = killer
 	hp -= amount
+	if _friendly_selected or _enemy_inspect:
+		queue_redraw()
 	if hp <= 0.0:
 		_die()
 
@@ -427,4 +461,5 @@ func _die() -> void:
 		var mgr := get_tree().get_first_node_in_group("match_manager")
 		if mgr and mgr.has_method("register_kill"):
 			mgr.register_kill(_last_killer)
+	SfxRouter.play_unit_death(global_position, self)
 	queue_free()

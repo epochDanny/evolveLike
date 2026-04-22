@@ -63,6 +63,11 @@ func distance_to_footprint_edge(world_pos: Vector2) -> float:
 var health: float = 8500.0
 var _defense_cd: float = 0.0
 var _owner_base: PlayerBase = null
+var _friendly_selected: bool = false
+var _enemy_inspect: bool = false
+
+const _FRIENDLY_OUTLINE := Color(0.35, 0.95, 0.42, 0.72)
+const _ENEMY_INSPECT_OUTLINE := Color(0.98, 0.38, 0.32, 0.78)
 
 @onready var _sprite: Sprite2D = $Sprite2D
 @onready var _label: Label = $Label
@@ -70,6 +75,20 @@ var _owner_base: PlayerBase = null
 
 func set_owner_base(player_base: PlayerBase) -> void:
 	_owner_base = player_base
+
+
+func set_selected(selected: bool) -> void:
+	_friendly_selected = selected
+	if selected:
+		_enemy_inspect = false
+	queue_redraw()
+
+
+func set_enemy_inspected(inspected: bool) -> void:
+	_enemy_inspect = inspected
+	if inspected:
+		_friendly_selected = false
+	queue_redraw()
 
 
 func apply_player_visual(accent: Color) -> void:
@@ -91,6 +110,37 @@ func _ready() -> void:
 	health_changed.emit(health, max_health)
 
 
+func _draw() -> void:
+	if not _friendly_selected and not _enemy_inspect:
+		return
+	var outline := Rect2(
+		-FOOTPRINT_HALF_WIDTH,
+		-FOOTPRINT_EXTENT_ABOVE_CENTER,
+		FOOTPRINT_HALF_WIDTH * 2.0,
+		FOOTPRINT_EXTENT_ABOVE_CENTER + FOOTPRINT_EXTENT_BELOW_CENTER
+	)
+	var outline_col: Color = (
+		_FRIENDLY_OUTLINE if _friendly_selected else _ENEMY_INSPECT_OUTLINE
+	)
+	draw_rect(outline, outline_col, false, 2.0)
+	var bar_top := -FOOTPRINT_EXTENT_ABOVE_CENTER - 12.0
+	if _enemy_inspect:
+		var txt := "%.0f / %.0f" % [health, max_health]
+		var font := ProceduralTextures.default_ui_font()
+		var fs := 12
+		var sz: Vector2 = font.get_string_size(txt, HORIZONTAL_ALIGNMENT_LEFT, -1, fs)
+		draw_string(
+			font,
+			Vector2(-sz.x * 0.5, bar_top - float(fs) - 2.0),
+			txt,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			fs,
+			Color(0.98, 0.45, 0.4, 0.98)
+		)
+	HealthBarUtil.draw_bar(self, 0.0, bar_top, 104.0, 6.0, health, max_health)
+
+
 func _physics_process(delta: float) -> void:
 	if health <= 0.0:
 		return
@@ -105,6 +155,7 @@ func _physics_process(delta: float) -> void:
 		return
 	victim.take_damage(defense_damage, team_id, _owner_base)
 	_defense_cd = defense_interval
+	SfxRouter.play_bunker_attack(global_position, self)
 
 
 func _find_nearest_enemy_unit_in_range() -> CombatUnit:
@@ -127,7 +178,7 @@ func _find_nearest_enemy_unit_in_range() -> CombatUnit:
 
 func _refresh_label() -> void:
 	if _label:
-		_label.text = "%s\n%.0f / %.0f" % [team_name, health, max_health]
+		_label.text = team_name
 
 
 func take_damage(amount: float, attacker_team: int, _killer: PlayerBase = null) -> void:
@@ -136,6 +187,9 @@ func take_damage(amount: float, attacker_team: int, _killer: PlayerBase = null) 
 	health -= amount
 	_refresh_label()
 	health_changed.emit(health, max_health)
+	if _friendly_selected or _enemy_inspect:
+		queue_redraw()
 	if health <= 0.0:
+		SfxRouter.play_bunker_destroyed(global_position, self)
 		destroyed_bunker.emit(team_id)
 		queue_free()

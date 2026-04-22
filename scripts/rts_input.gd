@@ -4,6 +4,8 @@ extends Control
 
 const BOX_MIN_DRAG_PX := 6.0
 const UNIT_PICK_RADIUS := 28.0
+## Slightly larger so attack-move and enemy inspect register on first try.
+const ENEMY_UNIT_PICK_RADIUS := 44.0
 
 var _human: PlayerBase
 var _camera: Camera2D
@@ -11,6 +13,9 @@ var _camera: Camera2D
 var _lmb_down: bool = false
 var _box_screen_start: Vector2 = Vector2.ZERO
 var _selected: Array[CombatUnit] = []
+var _selected_bunker: Bunker = null
+var _inspected_enemy_unit: CombatUnit = null
+var _inspected_enemy_bunker: Bunker = null
 
 var _mgr: Node = null
 
@@ -113,7 +118,9 @@ func _click_select_at(screen: Vector2) -> void:
 	var add := Input.is_key_pressed(KEY_SHIFT)
 
 	if u != null:
+		_clear_enemy_inspect()
 		if add:
+			_deselect_bunker()
 			if u in _selected:
 				_selected.erase(u)
 				u.set_selected(false)
@@ -125,9 +132,25 @@ func _click_select_at(screen: Vector2) -> void:
 			_selected = [u]
 			u.set_selected(true)
 	else:
-		if not add:
+		var bunker_here := _pick_own_bunker_at(world)
+		if bunker_here != null:
+			_clear_enemy_inspect()
 			_clear_selection_visual()
 			_selected.clear()
+			_selected_bunker = bunker_here
+			bunker_here.set_selected(true)
+		else:
+			var enemy_u := _pick_enemy_unit_at(world)
+			if enemy_u != null:
+				_set_inspected_enemy_unit(enemy_u)
+			else:
+				var enemy_b := _pick_enemy_bunker_at(world)
+				if enemy_b != null:
+					_set_inspected_enemy_bunker(enemy_b)
+				elif not add:
+					_clear_selection_visual()
+					_selected.clear()
+					_clear_enemy_inspect()
 
 
 func _box_select(p1_screen: Vector2, p2_screen: Vector2) -> void:
@@ -140,6 +163,10 @@ func _box_select(p1_screen: Vector2, p2_screen: Vector2) -> void:
 	if not add:
 		_clear_selection_visual()
 		_selected.clear()
+		_clear_enemy_inspect()
+	else:
+		_deselect_bunker()
+		_clear_enemy_inspect()
 
 	for u in get_tree().get_nodes_in_group("units"):
 		if not is_instance_valid(u) or not (u is CombatUnit):
@@ -188,10 +215,40 @@ func _is_own_unit(cu: CombatUnit) -> bool:
 	return owner != null and is_instance_valid(owner) and owner == _human
 
 
+func _deselect_bunker() -> void:
+	if _selected_bunker != null and is_instance_valid(_selected_bunker):
+		_selected_bunker.set_selected(false)
+	_selected_bunker = null
+
+
+func _clear_enemy_inspect() -> void:
+	if _inspected_enemy_unit != null and is_instance_valid(_inspected_enemy_unit):
+		_inspected_enemy_unit.set_enemy_inspected(false)
+	_inspected_enemy_unit = null
+	if _inspected_enemy_bunker != null and is_instance_valid(_inspected_enemy_bunker):
+		_inspected_enemy_bunker.set_enemy_inspected(false)
+	_inspected_enemy_bunker = null
+
+
+func _set_inspected_enemy_unit(u: CombatUnit) -> void:
+	_deselect_bunker()
+	_clear_enemy_inspect()
+	_inspected_enemy_unit = u
+	u.set_enemy_inspected(true)
+
+
+func _set_inspected_enemy_bunker(b: Bunker) -> void:
+	_deselect_bunker()
+	_clear_enemy_inspect()
+	_inspected_enemy_bunker = b
+	b.set_enemy_inspected(true)
+
+
 func _clear_selection_visual() -> void:
 	for u in _selected:
 		if is_instance_valid(u):
 			u.set_selected(false)
+	_deselect_bunker()
 
 
 func _prune_selection() -> void:
@@ -202,6 +259,21 @@ func _prune_selection() -> void:
 		elif is_instance_valid(u):
 			u.set_selected(false)
 	_selected = next
+	if _selected_bunker != null:
+		if not is_instance_valid(_selected_bunker) or _selected_bunker.health <= 0.0:
+			if is_instance_valid(_selected_bunker):
+				_selected_bunker.set_selected(false)
+			_selected_bunker = null
+	if _inspected_enemy_unit != null:
+		if not is_instance_valid(_inspected_enemy_unit) or _inspected_enemy_unit.hp <= 0.0:
+			if is_instance_valid(_inspected_enemy_unit):
+				_inspected_enemy_unit.set_enemy_inspected(false)
+			_inspected_enemy_unit = null
+	if _inspected_enemy_bunker != null:
+		if not is_instance_valid(_inspected_enemy_bunker) or _inspected_enemy_bunker.health <= 0.0:
+			if is_instance_valid(_inspected_enemy_bunker):
+				_inspected_enemy_bunker.set_enemy_inspected(false)
+			_inspected_enemy_bunker = null
 
 
 func _issue_orders_at_mouse() -> void:
@@ -231,7 +303,7 @@ func _issue_orders_at_mouse() -> void:
 
 func _pick_enemy_unit_at(world: Vector2) -> CombatUnit:
 	var best: CombatUnit = null
-	var best_d := UNIT_PICK_RADIUS
+	var best_d := ENEMY_UNIT_PICK_RADIUS
 	for u in get_tree().get_nodes_in_group("units"):
 		if not is_instance_valid(u) or not (u is CombatUnit):
 			continue
@@ -263,3 +335,14 @@ func _pick_enemy_bunker_at(world: Vector2) -> Bunker:
 			best_d = d
 			best = bu
 	return best
+
+
+func _pick_own_bunker_at(world: Vector2) -> Bunker:
+	if _human == null or _human.bunker == null or not is_instance_valid(_human.bunker):
+		return null
+	var bu := _human.bunker
+	if bu.health <= 0.0:
+		return null
+	if bu.distance_to_footprint_edge(world) <= 96.0:
+		return bu
+	return null

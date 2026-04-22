@@ -47,9 +47,11 @@ func _ready() -> void:
 		_match_ui.ffa_watch_pressed.connect(_on_ffa_watch_continue)
 	_spawn_bases_from_session()
 	_refresh_hud()
+	MusicRouter.play_match_music()
 
 
 func _on_match_ui_main_menu() -> void:
+	MusicRouter.stop_match_music(0.4)
 	get_tree().paused = false
 	get_tree().change_scene_to_file("res://scenes/main_menu.tscn")
 
@@ -232,6 +234,7 @@ func _on_bunker_destroyed(_losing_team: int, owner_pb: PlayerBase) -> void:
 func _finish_match_full(winner_team_id: int) -> void:
 	_game_over = true
 	_ffa_spectating = false
+	MusicRouter.stop_match_music(2.0)
 	if _match_ui:
 		_match_ui.hide_all()
 		_match_ui.set_spectator_bar_visible(false)

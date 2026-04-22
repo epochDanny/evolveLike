@@ -6,6 +6,16 @@ extends Control
 @onready var _ffa_label: Label = $Center/VBox/FFALabel
 @onready var _teams_label: Label = $Center/VBox/TeamsLabel
 @onready var _human_slot: OptionButton = %HumanSlotOption
+@onready var _main_vbox: Control = $Center/VBox
+@onready var _settings_overlay: Control = $SettingsLayer/SettingsOverlay
+@onready var _music_volume: HSlider = %MusicVolumeSlider
+@onready var _sfx_volume: HSlider = %SfxVolumeSlider
+@onready var _music_mute: CheckBox = %MusicMuteCheck
+@onready var _sfx_mute: CheckBox = %SfxMuteCheck
+@onready var _music_percent: Label = %MusicPercent
+@onready var _sfx_percent: Label = %SfxPercent
+
+var _syncing_settings_ui: bool = false
 
 
 func _ready() -> void:
@@ -61,3 +71,53 @@ func _on_start_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	get_tree().quit()
+
+
+func _on_settings_pressed() -> void:
+	_sync_settings_ui_from_manager()
+	_settings_overlay.show()
+	_main_vbox.hide()
+
+
+func _on_settings_back_pressed() -> void:
+	_settings_overlay.hide()
+	_main_vbox.show()
+
+
+func _sync_settings_ui_from_manager() -> void:
+	_syncing_settings_ui = true
+	var m_lin: float = SettingsManager.get_music_volume_linear()
+	var s_lin: float = SettingsManager.get_sfx_volume_linear()
+	_music_volume.value = m_lin * 100.0
+	_sfx_volume.value = s_lin * 100.0
+	_music_mute.button_pressed = SettingsManager.is_music_muted()
+	_sfx_mute.button_pressed = SettingsManager.is_sfx_muted()
+	_music_percent.text = "%d%%" % int(roundf(m_lin * 100.0))
+	_sfx_percent.text = "%d%%" % int(roundf(s_lin * 100.0))
+	_syncing_settings_ui = false
+
+
+func _on_music_volume_changed(value: float) -> void:
+	_music_percent.text = "%d%%" % int(value)
+	if _syncing_settings_ui:
+		return
+	SettingsManager.set_music_volume_linear(value / 100.0)
+
+
+func _on_sfx_volume_changed(value: float) -> void:
+	_sfx_percent.text = "%d%%" % int(value)
+	if _syncing_settings_ui:
+		return
+	SettingsManager.set_sfx_volume_linear(value / 100.0)
+
+
+func _on_music_mute_toggled(pressed: bool) -> void:
+	if _syncing_settings_ui:
+		return
+	SettingsManager.set_music_muted(pressed)
+
+
+func _on_sfx_mute_toggled(pressed: bool) -> void:
+	if _syncing_settings_ui:
+		return
+	SettingsManager.set_sfx_muted(pressed)

@@ -23,6 +23,9 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 
 EvolutionConfig="*res://scripts/evolution_config.gd"
 GameSession="*res://scripts/game_session.gd"
+SfxRouter="*res://scripts/sfx_router.gd"
+MusicRouter="*res://scripts/music_router.gd"
+SettingsManager="*res://scripts/settings_manager.gd"
 
 [display]
 

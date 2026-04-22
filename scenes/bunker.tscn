@@ -18,6 +18,7 @@ position = Vector2(0, -20)
 shape = SubResource("RectangleShape2D_fort")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
+z_index = -1
 texture_filter = 1
 
 [node name="Label" type="Label" parent="."]
