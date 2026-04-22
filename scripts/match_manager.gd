@@ -20,6 +20,10 @@ func is_match_over() -> bool:
 	return _game_over
 
 
+func get_human_player() -> PlayerBase:
+	return _human_player
+
+
 func is_human_spectating() -> bool:
 	if _game_over:
 		return false
@@ -182,7 +186,7 @@ func _refresh_hud() -> void:
 		"[%s]\n" % mode_hint
 		+ body_lines
 		+ spec_hint
-		+ "\n\nWASD — move your spawner  |  P / Esc — pause  |  Restart — new match  |  Main menu  |  R — when paused / after win"
+		+ "\n\nWASD — move your spawner  |  Click / drag-box — select your units  |  Shift — add to selection  |  Right-click — move or attack  |  P / Esc — pause  |  Restart / Main menu  |  R — when paused / after win"
 	)
 
 

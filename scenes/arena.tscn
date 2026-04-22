@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://arena001"]
+[gd_scene load_steps=6 format=3 uid="uid://arena001"]
 
 [ext_resource type="Script" path="res://scripts/match_manager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/game_hud.gd" id="3"]
 [ext_resource type="Script" path="res://scripts/arena_navigation.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/match_ui.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/rts_input.gd" id="6"]
 
 [node name="Arena" type="Node2D" groups=["arena_root"]]
 script = ExtResource("1")
@@ -37,6 +38,16 @@ limit_bottom = 1200
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 script = ExtResource("3")
+
+[node name="RTSInput" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+script = ExtResource("6")
 
 [node name="HUD" type="Label" parent="CanvasLayer"]
 offset_left = 20.0
@@ -84,7 +95,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 0
+mouse_filter = 2
 script = ExtResource("5")
 
 [node name="Dim" type="ColorRect" parent="MatchLayer/MatchUI"]
@@ -95,7 +106,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-mouse_filter = 2
+mouse_filter = 0
 color = Color(0, 0, 0, 0.65)
 
 [node name="TeamsEnd" type="PanelContainer" parent="MatchLayer/MatchUI"]
