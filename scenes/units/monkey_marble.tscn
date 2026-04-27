@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://c026as4ukthi6"]
+
+[ext_resource type="Texture2D" uid="uid://ffm78qb01usq" path="res://snake.png" id="1_h2mnr"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tj0l4"]
+albedo_color = Color(0, 0, 0, 1)
+texture_repeat = false
+
+[sub_resource type="SphereMesh" id="SphereMesh_db2m6"]
+material = SubResource("StandardMaterial3D_tj0l4")
+flip_faces = true
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_msdr2"]
+
+[node name="ElephantMarble" type="CharacterBody3D" unique_id=978434792]
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=35944026]
+mesh = SubResource("SphereMesh_db2m6")
+
+[node name="Decal" type="Decal" parent="." unique_id=718350659]
+transform = Transform3D(-0.9999816, 0.0053390763, -0.0028835982, 0.0026997775, -0.03411801, -0.9994143, -0.005434331, -0.99940354, 0.034102965, 0, 0, 0)
+size = Vector3(0.8, 1.1, 0.8)
+texture_albedo = ExtResource("1_h2mnr")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="." unique_id=1492508615]
+shape = SubResource("SphereShape3D_msdr2")

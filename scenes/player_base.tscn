@@ -1,8 +1,8 @@
-[gd_scene load_steps=4 format=3 uid="uid://playerbase001"]
+[gd_scene load_steps=4 format=3 uid="uid://dy2dmlji3seqq"]
 
-[ext_resource type="Script" path="res://scripts/player_base.gd" id="1"]
-[ext_resource type="PackedScene" path="res://scenes/bunker.tscn" id="2"]
-[ext_resource type="PackedScene" path="res://scenes/spawner.tscn" id="3"]
+[ext_resource type="Script" uid="uid://c474yfgjwti8x" path="res://scripts/player_base.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://bunkerfort001" path="res://scenes/bunker.tscn" id="2"]
+[ext_resource type="PackedScene" uid="uid://5tntmfxrn185" path="res://scenes/spawner.tscn" id="3"]
 
 [node name="PlayerBase" type="Node2D"]
 script = ExtResource("1")
