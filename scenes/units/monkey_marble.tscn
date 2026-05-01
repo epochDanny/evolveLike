@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c026as4ukthi6"]
 
-[ext_resource type="Texture2D" uid="uid://ffm78qb01usq" path="res://snake.png" id="1_h2mnr"]
+[ext_resource type="Texture2D" path="res://monkey.png" id="1_h2mnr"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tj0l4"]
 albedo_color = Color(0, 0, 0, 1)
@@ -12,7 +12,7 @@ flip_faces = true
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_msdr2"]
 
-[node name="ElephantMarble" type="CharacterBody3D" unique_id=978434792]
+[node name="MonkeyMarble" type="CharacterBody3D" unique_id=978434792]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=35944026]
 mesh = SubResource("SphereMesh_db2m6")

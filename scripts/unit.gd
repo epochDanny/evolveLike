@@ -44,6 +44,16 @@ const _KENNEY_ROUND_TEXTURES: Array[Texture2D] = [
 	preload("res://assets/units/kenney_animal_pack/snake.png"),
 ]
 
+## Preview path: keep gameplay 2D, but render coworker 3D marble scenes as unit sprites.
+const _USE_MARBLE_PREVIEW_UNITS := true
+const _MARBLE_UNIT_SCENES: Array[PackedScene] = [
+	preload("res://scenes/units/elephant_marble.tscn"),
+	preload("res://scenes/units/snake_marble.tscn"),
+	preload("res://scenes/units/pig_marble.tscn"),
+	preload("res://scenes/units/monkey_marble.tscn"),
+]
+const _MARBLE_VIEWPORT_SIZE := Vector2i(96, 96)
+const _MARBLE_SPRITE_SCALE := Vector2(0.58, 0.58)
 const _CUSTOM_UNIT_SCALE := Vector2(0.11, 0.11)
 const _CUSTOM_UNIT_WALK_FPS := 9.0
 
@@ -56,6 +66,9 @@ static var _unit_keyed_textures: Dictionary = {}
 @onready var _mite_anim: AnimatedSprite2D = $MiteAnim
 @onready var _striker_anim: AnimatedSprite2D = $StrikerAnim
 @onready var _nav: NavigationAgent2D = $NavigationAgent2D
+
+var _marble_viewport: SubViewport
+var _marble_root: Node3D
 
 
 func set_owner_player(player_base: PlayerBase) -> void:
@@ -248,8 +261,10 @@ static func _get_striker_sprite_frames() -> SpriteFrames:
 	return sf
 
 
-func _process(_delta: float) -> void:
-	if tier_display == 1:
+func _process(delta: float) -> void:
+	if _marble_root != null:
+		_spin_marble_visual(delta)
+	elif tier_display == 1:
 		_sync_custom_unit_anim(_mite_anim)
 	elif tier_display == 2:
 		_sync_custom_unit_anim(_striker_anim)
@@ -271,7 +286,15 @@ func _sync_custom_unit_anim(anim: AnimatedSprite2D) -> void:
 
 
 func _apply_unit_visual() -> void:
-	if tier_display == 1 and _mite_anim != null:
+	if _USE_MARBLE_PREVIEW_UNITS and _body_sprite:
+		if _mite_anim:
+			_mite_anim.visible = false
+		if _striker_anim:
+			_striker_anim.visible = false
+		if not _apply_marble_visual():
+			_apply_kenney_round_visual()
+	elif tier_display == 1 and _mite_anim != null:
+		_clear_marble_visual()
 		_mite_anim.sprite_frames = _get_mite_sprite_frames()
 		_mite_anim.scale = _CUSTOM_UNIT_SCALE
 		_mite_anim.visible = true
@@ -281,6 +304,7 @@ func _apply_unit_visual() -> void:
 		if _body_sprite:
 			_body_sprite.visible = false
 	elif tier_display == 2 and _striker_anim != null:
+		_clear_marble_visual()
 		_striker_anim.sprite_frames = _get_striker_sprite_frames()
 		_striker_anim.scale = _CUSTOM_UNIT_SCALE
 		_striker_anim.visible = true
@@ -289,19 +313,95 @@ func _apply_unit_visual() -> void:
 			_mite_anim.visible = false
 		if _body_sprite:
 			_body_sprite.visible = false
-	elif _body_sprite and not _KENNEY_ROUND_TEXTURES.is_empty():
+	elif _body_sprite:
 		if _mite_anim:
 			_mite_anim.visible = false
 		if _striker_anim:
 			_striker_anim.visible = false
-		var idx := (maxi(tier_display, 1) - 1) % _KENNEY_ROUND_TEXTURES.size()
-		_body_sprite.texture = _KENNEY_ROUND_TEXTURES[idx]
-		_body_sprite.visible = true
-		_body_sprite.scale = _CUSTOM_UNIT_SCALE
+		if not _apply_marble_visual():
+			_apply_kenney_round_visual()
 	if _tier_label:
 		_tier_label.add_theme_font_override("font", ProceduralTextures.default_ui_font())
 		_tier_label.text = str(tier_display)
 		_tier_label.add_theme_color_override("font_color", player_accent)
+
+
+func _apply_kenney_round_visual() -> void:
+	_clear_marble_visual()
+	if _body_sprite == null or _KENNEY_ROUND_TEXTURES.is_empty():
+		return
+	var idx := (maxi(tier_display, 1) - 1) % _KENNEY_ROUND_TEXTURES.size()
+	_body_sprite.texture = _KENNEY_ROUND_TEXTURES[idx]
+	_body_sprite.visible = true
+	_body_sprite.scale = _CUSTOM_UNIT_SCALE
+
+
+func _apply_marble_visual() -> bool:
+	if _body_sprite == null or _MARBLE_UNIT_SCENES.is_empty():
+		return false
+	if _marble_viewport == null:
+		var scene := _MARBLE_UNIT_SCENES[(maxi(tier_display, 1) - 1) % _MARBLE_UNIT_SCENES.size()]
+		var marble := scene.instantiate() as Node3D
+		if marble == null:
+			return false
+		_prepare_marble_scene_for_preview(marble)
+
+		_marble_viewport = SubViewport.new()
+		_marble_viewport.name = "MarblePreviewViewport"
+		_marble_viewport.size = _MARBLE_VIEWPORT_SIZE
+		_marble_viewport.transparent_bg = true
+		_marble_viewport.own_world_3d = true
+		_marble_viewport.render_target_update_mode = SubViewport.UPDATE_ALWAYS
+		add_child(_marble_viewport)
+
+		var light := DirectionalLight3D.new()
+		light.name = "PreviewLight"
+		light.light_energy = 1.8
+		light.rotation_degrees = Vector3(-45.0, -35.0, 0.0)
+		_marble_viewport.add_child(light)
+
+		var camera := Camera3D.new()
+		camera.name = "PreviewCamera"
+		camera.current = true
+		camera.fov = 30.0
+		camera.position = Vector3(0.0, 0.15, 2.2)
+		_marble_viewport.add_child(camera)
+		camera.look_at(Vector3.ZERO, Vector3.UP)
+
+		_marble_root = Node3D.new()
+		_marble_root.name = "MarbleVisualRoot"
+		_marble_viewport.add_child(_marble_root)
+		_marble_root.add_child(marble)
+
+	_body_sprite.texture = _marble_viewport.get_texture()
+	_body_sprite.visible = true
+	_body_sprite.scale = _MARBLE_SPRITE_SCALE
+	return true
+
+
+func _prepare_marble_scene_for_preview(marble: Node3D) -> void:
+	for child in marble.find_children("*", "MeshInstance3D", true, false):
+		var mesh_instance := child as MeshInstance3D
+		var sphere := mesh_instance.mesh as SphereMesh
+		if sphere == null:
+			continue
+		sphere = sphere.duplicate()
+		sphere.flip_faces = false
+		mesh_instance.mesh = sphere
+
+
+func _clear_marble_visual() -> void:
+	_marble_root = null
+	if _marble_viewport != null:
+		_marble_viewport.queue_free()
+		_marble_viewport = null
+
+
+func _spin_marble_visual(delta: float) -> void:
+	var speed := 1.1
+	if velocity.length_squared() > 90.0:
+		speed = 4.0
+	_marble_root.rotate_y(speed * delta)
 
 
 func _physics_process(delta: float) -> void:

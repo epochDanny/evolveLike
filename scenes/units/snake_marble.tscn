@@ -12,7 +12,7 @@ flip_faces = true
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_msdr2"]
 
-[node name="ElephantMarble" type="CharacterBody3D" unique_id=978434792]
+[node name="SnakeMarble" type="CharacterBody3D" unique_id=978434792]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=35944026]
 mesh = SubResource("SphereMesh_db2m6")
