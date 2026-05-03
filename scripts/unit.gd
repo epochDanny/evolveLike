@@ -397,11 +397,29 @@ func _clear_marble_visual() -> void:
 		_marble_viewport = null
 
 
+#func _spin_marble_visual(delta: float) -> void:
+	#var speed := 1.1
+	#if velocity.length_squared() > 90.0:
+		#speed = 4.0
+	#_marble_root.rotate_y(speed * delta)
+	
+	
 func _spin_marble_visual(delta: float) -> void:
-	var speed := 1.1
-	if velocity.length_squared() > 90.0:
-		speed = 4.0
-	_marble_root.rotate_y(speed * delta)
+	# 1. Check if we are actually moving to avoid math errors
+	if velocity.length() > 0.1:
+		# 2. Define how fast the "roll" should look. 
+		# A higher number makes it look like it has more traction.
+		var roll_speed := 0.10 
+		
+		# 3. Calculate the rotation axis. 
+		# We take the movement direction and rotate it 90 degrees.
+		# Moving Forward (Y) means rotating around X.
+		# Moving Right (X) means rotating around Y.
+		var rolling_axis = Vector3(velocity.y, 0, -velocity.x).normalized()
+		
+		# 4. Apply the rotation based on the distance traveled (velocity * delta)
+		var amount_to_rotate = velocity.length() * delta * roll_speed
+		_marble_root.rotate(rolling_axis, amount_to_rotate)
 
 
 func _physics_process(delta: float) -> void:

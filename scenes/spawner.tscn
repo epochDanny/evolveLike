@@ -1,26 +1,24 @@
-[gd_scene load_steps=2 format=3 uid="uid://spawnercraft01"]
+[gd_scene format=3 uid="uid://5tntmfxrn185"]
 
-[ext_resource type="Script" path="res://scripts/spawner.gd" id="1"]
+[ext_resource type="Script" uid="uid://crigtr7i4nm1b" path="res://scripts/spawner.gd" id="1"]
 
-[node name="Spawner" type="Node2D"]
+[node name="Spawner" type="Node2D" unique_id=1219435032]
 z_index = 10
 script = ExtResource("1")
 
-[node name="Timer" type="Timer" parent="."]
+[node name="Timer" type="Timer" parent="." unique_id=175353400]
 wait_time = 2.15
-one_shot = false
-autostart = false
 
-[node name="TeamLetter" type="Label" parent="."]
+[node name="TeamLetter" type="Label" parent="." unique_id=703870432]
 visible = false
 offset_left = -20.0
 offset_top = -52.0
 offset_right = 20.0
 offset_bottom = -12.0
-horizontal_alignment = 1
-vertical_alignment = 1
 theme_override_font_sizes/font_size = 22
 text = "A"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=333546132]
 texture_filter = 1
